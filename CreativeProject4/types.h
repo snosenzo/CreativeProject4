@@ -37,6 +37,11 @@ typedef struct material {
     float shininess;
 } material;
 
+typedef struct vec2 {
+    GLfloat x;
+    GLfloat y;
+} vec2;
+
 
 typedef struct obj {
     vec4 *vertices;

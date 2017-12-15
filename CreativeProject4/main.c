@@ -63,12 +63,14 @@ vec4 AmbientProduct, DiffuseProduct, SpecularProduct;
 GLuint AmbientProduct_loc, DiffuseProduct_loc, SpecularProduct_loc;
 float att_constant = 0;
 float att_linear = 0;
-float att_quadratic = .1;
+float att_quadratic = .05;
 GLuint att_constant_loc;
 GLuint att_linear_loc;
 GLuint att_quadratic_loc;
 GLuint shininess_loc;
 GLuint isShadow_loc;
+
+GLuint isTextureObject_loc;
 
 float view_theta = 0;
 float view_phi = 1.2;
@@ -136,7 +138,12 @@ void EyePointOnSphere(float theta, float phi, float radius) {
 
 
 void initObjs() {
-    //    sphereObj(1, 0, 0, 0, &(objs[0]), &(objs[1]), &(objs[2]));
+    defineVector(0,.5, 0, 1, &(objs[numObjs].mat.reflect_ambient));
+    defineVector(0, .5, 0, 1, &(objs[numObjs].mat.reflect_diffuse));
+    defineVector(0, 0, 0, 1, &(objs[numObjs].mat.reflect_specular));
+    objs[numObjs].mat.shininess = 2;
+    rectObj(20, .01, 20, 0, -.03, 0, &objs[numObjs]);
+    
     
     tetrahedron(5, &(objs[numObjs]));
     num_vertices+= objs[numObjs].num_verts;
@@ -165,7 +172,7 @@ void initObjs() {
         defineVector(0, 5, 0, 1, &(objs[numObjs].loc));
         getTranslationMatrix(objs[numObjs].loc.x, objs[numObjs].loc.y, objs[numObjs].loc.z, &(objs[numObjs].translation));
         objs[numObjs].rotation = identity;
-        objs[numObjs].scale = .05;
+        objs[numObjs].scale = .1;
         vec4 color = getRandomColorVec();
         
         objs[numObjs].mat.reflect_ambient = color;
@@ -186,11 +193,7 @@ void initObjs() {
     objs[numObjs].mat.shininess = 10;
     numObjs++;
     
-    defineVector(0,.5, 0, 1, &(objs[numObjs].mat.reflect_ambient));
-    defineVector(0, .5, 0, 1, &(objs[numObjs].mat.reflect_diffuse));
-    defineVector(0, 0, 0, 1, &(objs[numObjs].mat.reflect_specular));
-    objs[numObjs].mat.shininess = 2;
-    rectObj(20, .01, 20, 0, -.03, 0, &objs[numObjs]);
+    
 }
 
 
@@ -232,7 +235,7 @@ void init(void)
     defineVector(1, 1, 1, 1, &light_diffuse);
     defineVector(1, 1, 1, 1, &light_specular);
     defineVector(0.2, .2, .2, 1, &light_ambient);
-    defineVector(0, 6, 0, 1, &light_pos);
+    defineVector(0, 10, 0, 1, &light_pos);
     defineVector(0, 5, 4, 1, &_eye);
     defineVector(0, .25, 0, 1, &_at);
     defineVector(0, 1, 0, 1, &_up);
@@ -242,8 +245,65 @@ void init(void)
     
     initObjs();
     
+    // reading in texture
+    
+    GLubyte my_texels[500][500][3];
+    unsigned char uc;
+    
+    FILE *fp;
+    int i, j, k;
+    
+    fp = fopen("wood_500_500.raw", "r");
+    if(fp == NULL)
+    {
+        printf("Unable to open file\n");
+        exit(0);
+    }
+    
+    for(i = 0; i < 500; i++) {
+        for(j = 0; j < 500; j++) {
+            for(k = 0; k < 3; k++) {
+                fread(&uc, 1, 1, fp);
+                my_texels[i][j][k] = uc;
+            }
+        }
+    }
+    fclose(fp);
+    GLfloat tex_coords[24][2];
+    for(int i = 0; i < 24; i+=4) {
+        tex_coords[i][0] = 0.0;
+        tex_coords[i][1] = 0.0;
+        tex_coords[i+1][0] = 1.0;
+        tex_coords[i+1][1] = 0.0;
+        tex_coords[i+2][0] = 1.0;
+        tex_coords[i+2][1] = 1.0;
+        tex_coords[i+3][0] = 0.0;
+        tex_coords[i+3][1] = 1.0;
+    }
+    
     GLuint program = initShader("vshader.glsl", "fshader.glsl");
     glUseProgram(program);
+    
+    // Texture Object and Parameters
+    GLuint mytex;
+    glGenTextures(1, &mytex);
+    glBindTexture(GL_TEXTURE_2D, mytex);
+    glTexImage2D(GL_TEXTURE_2D,
+                 0,
+                 GL_RGB,
+                 500, // width
+                 500, // height
+                 0,
+                 GL_RGB,
+                 GL_UNSIGNED_BYTE,
+                 my_texels);
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+    
+    
+    // Adding objects to the buffer
     GLuint vao;
     glGenVertexArraysAPPLE(1, &vao);
     glBindVertexArrayAPPLE(vao);
@@ -261,6 +321,8 @@ void init(void)
     int bufferSpace = sizeof(vec4) * num_vertices;
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vec4) * num_vertices , total_vertices);
     glBufferSubData(GL_ARRAY_BUFFER, bufferSpace, sizeof(vec4) * num_vertices, vNormals);
+    glBufferSubData(GL_ARRAY_BUFFER, sizeof(vec4) * num_vertices * 2, sizeof(tex_coords), tex_coords);
+
     
     GLuint vPosition = glGetAttribLocation(program, "vPosition");
     glEnableVertexAttribArray(vPosition);
@@ -268,6 +330,9 @@ void init(void)
     GLuint vNormal = glGetAttribLocation(program, "vNormal");
     glEnableVertexAttribArray(vNormal);
     glVertexAttribPointer(vNormal, 4, GL_FLOAT, GL_FALSE, 0, (GLvoid *) (sizeof(vec4) * (num_vertices)));
+    GLuint vTexCoord = glGetAttribLocation(program, "vTexCoord");
+    glEnableVertexAttribArray(vTexCoord);
+    glVertexAttribPointer(vTexCoord, 2, GL_FLOAT, GL_FALSE, 0, (GLvoid *) (sizeof(vec4) * num_vertices * 2) );
     
     translate_loc = glGetUniformLocation(program, "translate");
     scale_loc = glGetUniformLocation(program, "scale");
@@ -284,7 +349,12 @@ void init(void)
     att_quadratic_loc = glGetUniformLocation(program, "att_quadratic");
     shininess_loc = glGetUniformLocation(program, "shininess");
     isShadow_loc = glGetUniformLocation(program, "isShadow");
+    isTextureObject_loc = glGetUniformLocation(program, "isTextureObject");
     
+    glUniform1i(glGetUniformLocation(program, "texture"), 0);
+
+    
+    glEnable(GL_CULL_FACE);
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glDepthRange(1,0);
@@ -305,6 +375,9 @@ void display(void) {
     //    glUniformMatrix4fv(translate_loc, 1, GL_FALSE, &identity);
     glUniform1i(isShadow_loc, 0);
     for(int i = 0; i < numObjs; i++) {
+        if(i == 0) {
+            glUniform1i(isTextureObject_loc, 1);
+        }
         glUniform1fv(scale_loc, 1, &objs[i].scale);
         glUniformMatrix4fv(rotation_loc, 1, GL_FALSE, &objs[i].rotation);
         glUniformMatrix4fv(translate_loc, 1, GL_FALSE, &objs[i].translation);
@@ -322,9 +395,11 @@ void display(void) {
         glUniform1f(att_linear_loc, att_linear);
         glUniform1f(att_quadratic_loc, att_quadratic);
         glDrawArrays(objs[i].mesh_type, objs[i].buffer_start_loc, objs[i].num_verts);
+        glUniform1i(isTextureObject_loc, 0);
     }
+    
     glUniform1i(isShadow_loc, 1);
-    for(int i = 0; i < numShadowObjs; i++) {
+    for(int i = 1; i < numShadowObjs+1; i++) {
         glUniform1fv(scale_loc, 1, &objs[i].scale);
         glUniformMatrix4fv(rotation_loc, 1, GL_FALSE, &objs[i].rotation);
         glUniformMatrix4fv(translate_loc, 1, GL_FALSE, &objs[i].translation);
@@ -335,11 +410,11 @@ void display(void) {
 }
 
 void resetPlaces() {
-    defineVector(0, 0, 0, 1, &(objs[0].vel));
-    defineVector(0, 5, 0, 1, &(objs[0].loc));
-    getTranslationMatrix(objs[0].loc.x, objs[0].loc.y, objs[0].loc.z, &(objs[0].translation));
+    defineVector(0, 0, 0, 1, &(objs[1].vel));
+    defineVector(0, 5, 0, 1, &(objs[1].loc));
+    getTranslationMatrix(objs[1].loc.x, objs[1].loc.y, objs[1].loc.z, &(objs[1].translation));
     
-    for(int i = 1; i < 51; i++) {
+    for(int i = 2; i < 52; i++) {
         vec4 temp1, temp2;
         defineVector(.5, 0, .5, 1, &temp2);
         tetrahedron(2, &(objs[i]));
@@ -374,7 +449,7 @@ void keyboard(unsigned char key, int mousex, int mousey) {
     if(key =='j') {
         light_pos.z+=.05;
     }
-    getTranslationMatrix(light_pos.x, light_pos.y, light_pos.z, &objs[numObjs-2].translation);
+    getTranslationMatrix(light_pos.x, light_pos.y, light_pos.z, &objs[numObjs-1].translation);
     // MVM keys
     if(key =='d') {
         view_theta+=.05;
@@ -431,7 +506,7 @@ vec4 getPointCircleOnYPlane(float radius, float theta) {
 }
 
 void idle() {
-    for(int i = 0; i < numShadowObjs; i++) {
+    for(int i = 1; i < numShadowObjs+1; i++) {
         vec4 temp, newLoc;
         
         addVectors(objs[i].vel, gravity, &temp);
@@ -445,6 +520,12 @@ void idle() {
                 
                 objs[i].vel.y *= -0.9f;
             }
+        }
+        if(objs[i].loc.x > 10 || objs[i].loc.x < -10) {
+            objs[i].vel.x *= -1.0f;
+        }
+        if(objs[i].loc.z > 10 || objs[i].loc.z < -10) {
+            objs[i].vel.z *= -1.0f;
         }
         addVectors(objs[i].loc, objs[i].vel, &newLoc);
         getTranslationMatrix(newLoc.x, newLoc.y, newLoc.z, &objs[i].translation);
@@ -465,7 +546,7 @@ int main(int argc, const char * argv[]) {
     
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
-    glutInitWindowSize(512, 512);
+    glutInitWindowSize(800, 800);
     glutInitWindowPosition(100,100);
     glutCreateWindow("Lighting Project");
     
