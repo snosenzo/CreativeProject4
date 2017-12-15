@@ -23,7 +23,7 @@ mat4 identity;
 //vec4 colors[2000000];
 vec4 total_vertices[20000000];
 vec4 vNormals[20000000];
-obj objs[60];
+obj objs[105];
 material mats[30];
 
 int numObjs = 0;
@@ -152,14 +152,14 @@ void initObjs() {
     getTranslationMatrix(objs[numObjs].loc.x, objs[numObjs].loc.y, objs[numObjs].loc.z, &(objs[numObjs].translation));
     objs[numObjs].rotation = identity;
     objs[numObjs].scale = .5;
-    defineVector(1, 0, 0, 1, &(objs[numObjs].mat.reflect_ambient));
-    defineVector(1, 0, 0, 1, &(objs[numObjs].mat.reflect_diffuse));
-    defineVector(1, 1, 1, 1, &(objs[numObjs].mat.reflect_specular));
+    defineVector(.8, .8, 0, 1, &(objs[numObjs].mat.reflect_ambient));
+    defineVector(.8, .8, 0, 1, &(objs[numObjs].mat.reflect_diffuse));
+    defineVector(1, 0, 0, 1, &(objs[numObjs].mat.reflect_specular));
     objs[numObjs].mat.shininess = 10;
     numShadowObjs++;
     numObjs++;
     
-    for(int i = 0; i < 50; i++) {
+    for(int i = 0; i < 100; i++) {
         vec4 temp1, temp2;
         defineVector(.5, 0, .5, 1, &temp2);
         
@@ -169,7 +169,8 @@ void initObjs() {
         subVectors(&randVec, &temp2, &temp1);
         printVector(&temp1);
         scalarMultVector(temp1, .2, &objs[numObjs].vel);
-        defineVector(0, 5, 0, 1, &(objs[numObjs].loc));
+        objs[numObjs].loc = getRandomColorVec();
+        scalarMultVector(objs[numObjs].loc, 5, &objs[numObjs].loc);
         getTranslationMatrix(objs[numObjs].loc.x, objs[numObjs].loc.y, objs[numObjs].loc.z, &(objs[numObjs].translation));
         objs[numObjs].rotation = identity;
         objs[numObjs].scale = .1;
@@ -423,7 +424,9 @@ void resetPlaces() {
         subVectors(&randVec, &temp2, &temp1);
         printVector(&temp1);
         scalarMultVector(temp1, .2, &objs[i].vel);
-        defineVector(0, 5, 0, 1, &(objs[i].loc));
+//        defineVector(0, 5, 0, 1, &(objs[i].loc));
+        objs[numObjs].loc = getRandomColorVec();
+        scalarMultVector(objs[numObjs].loc, 5, &objs[numObjs].loc);
         getTranslationMatrix(objs[i].loc.x, objs[i].loc.y, objs[i].loc.z, &(objs[i].translation));
     }
 }
@@ -506,7 +509,19 @@ vec4 getPointCircleOnYPlane(float radius, float theta) {
 }
 
 void idle() {
-    for(int i = 1; i < numShadowObjs+1; i++) {
+    // attraction behavior
+    for(int i = 2; i < numShadowObjs+1; i++) {
+        vec4 temp, newLoc, attraction;
+        subVectors(&objs[1].loc, &objs[i].loc, &temp);
+        float dist = magnitude(&temp);
+        scalarMultVector(temp, .02/(dist * dist), &attraction);
+        addVectors(objs[i].vel, attraction, &temp);
+        objs[i].vel = temp;
+        
+        addVectors(objs[i].loc, objs[i].vel, &newLoc);
+        objs[i].loc = newLoc;
+    }
+    for(int i = 2; i < numShadowObjs+1; i++) {
         vec4 temp, newLoc;
         
         addVectors(objs[i].vel, gravity, &temp);
@@ -531,6 +546,8 @@ void idle() {
         getTranslationMatrix(newLoc.x, newLoc.y, newLoc.z, &objs[i].translation);
         objs[i].loc = newLoc;
     }
+    
+    
     
     glutPostRedisplay();
 }
