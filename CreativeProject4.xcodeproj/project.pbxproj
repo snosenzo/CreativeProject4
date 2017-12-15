@@ -8,6 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		2297760E1FD75844004F33F9 /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 2297760D1FD75844004F33F9 /* main.c */; };
+		229776201FD75887004F33F9 /* objFuncs.c in Sources */ = {isa = PBXBuildFile; fileRef = 229776141FD75885004F33F9 /* objFuncs.c */; };
+		229776211FD75887004F33F9 /* transformFuncs.c in Sources */ = {isa = PBXBuildFile; fileRef = 229776151FD75885004F33F9 /* transformFuncs.c */; };
+		229776221FD75887004F33F9 /* vecMatOps.c in Sources */ = {isa = PBXBuildFile; fileRef = 229776181FD75886004F33F9 /* vecMatOps.c */; };
+		229776231FD75887004F33F9 /* initShader.c in Sources */ = {isa = PBXBuildFile; fileRef = 2297761B1FD75886004F33F9 /* initShader.c */; };
+		229776241FD75887004F33F9 /* viewFuncs.c in Sources */ = {isa = PBXBuildFile; fileRef = 2297761F1FD75887004F33F9 /* viewFuncs.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +30,20 @@
 /* Begin PBXFileReference section */
 		2297760A1FD75844004F33F9 /* CreativeProject4 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CreativeProject4; sourceTree = BUILT_PRODUCTS_DIR; };
 		2297760D1FD75844004F33F9 /* main.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
+		229776141FD75885004F33F9 /* objFuncs.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = objFuncs.c; sourceTree = "<group>"; };
+		229776151FD75885004F33F9 /* transformFuncs.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = transformFuncs.c; sourceTree = "<group>"; };
+		229776161FD75886004F33F9 /* types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = types.h; sourceTree = "<group>"; };
+		229776171FD75886004F33F9 /* transformFuncs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = transformFuncs.h; sourceTree = "<group>"; };
+		229776181FD75886004F33F9 /* vecMatOps.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = vecMatOps.c; sourceTree = "<group>"; };
+		229776191FD75886004F33F9 /* objFuncs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = objFuncs.h; sourceTree = "<group>"; };
+		2297761A1FD75886004F33F9 /* shapeVecs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = shapeVecs.h; sourceTree = "<group>"; };
+		2297761B1FD75886004F33F9 /* initShader.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = initShader.c; sourceTree = "<group>"; };
+		2297761C1FD75887004F33F9 /* initShader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = initShader.h; sourceTree = "<group>"; };
+		2297761D1FD75887004F33F9 /* vecMatOps.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vecMatOps.h; sourceTree = "<group>"; };
+		2297761E1FD75887004F33F9 /* viewFuncs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = viewFuncs.h; sourceTree = "<group>"; };
+		2297761F1FD75887004F33F9 /* viewFuncs.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = viewFuncs.c; sourceTree = "<group>"; };
+		229776251FD758E3004F33F9 /* vshader.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = vshader.glsl; path = "../../../../Library/Developer/Xcode/DerivedData/CreativeProject4-dzdkvoduhgrmhfesldvvrugbcfbb/Build/Products/Debug/vshader.glsl"; sourceTree = "<group>"; };
+		229776261FD758E3004F33F9 /* fshader.glsl */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = fshader.glsl; path = "../../../../Library/Developer/Xcode/DerivedData/CreativeProject4-dzdkvoduhgrmhfesldvvrugbcfbb/Build/Products/Debug/fshader.glsl"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -43,6 +62,8 @@
 			children = (
 				2297760C1FD75844004F33F9 /* CreativeProject4 */,
 				2297760B1FD75844004F33F9 /* Products */,
+				229776261FD758E3004F33F9 /* fshader.glsl */,
+				229776251FD758E3004F33F9 /* vshader.glsl */,
 			);
 			sourceTree = "<group>";
 		};
@@ -58,6 +79,18 @@
 			isa = PBXGroup;
 			children = (
 				2297760D1FD75844004F33F9 /* main.c */,
+				2297761B1FD75886004F33F9 /* initShader.c */,
+				2297761C1FD75887004F33F9 /* initShader.h */,
+				229776141FD75885004F33F9 /* objFuncs.c */,
+				229776191FD75886004F33F9 /* objFuncs.h */,
+				2297761A1FD75886004F33F9 /* shapeVecs.h */,
+				229776151FD75885004F33F9 /* transformFuncs.c */,
+				229776171FD75886004F33F9 /* transformFuncs.h */,
+				229776161FD75886004F33F9 /* types.h */,
+				229776181FD75886004F33F9 /* vecMatOps.c */,
+				2297761D1FD75887004F33F9 /* vecMatOps.h */,
+				2297761F1FD75887004F33F9 /* viewFuncs.c */,
+				2297761E1FD75887004F33F9 /* viewFuncs.h */,
 			);
 			path = CreativeProject4;
 			sourceTree = "<group>";
@@ -120,6 +153,11 @@
 			buildActionMask = 2147483647;
 			files = (
 				2297760E1FD75844004F33F9 /* main.c in Sources */,
+				229776231FD75887004F33F9 /* initShader.c in Sources */,
+				229776211FD75887004F33F9 /* transformFuncs.c in Sources */,
+				229776221FD75887004F33F9 /* vecMatOps.c in Sources */,
+				229776241FD75887004F33F9 /* viewFuncs.c in Sources */,
+				229776201FD75887004F33F9 /* objFuncs.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
